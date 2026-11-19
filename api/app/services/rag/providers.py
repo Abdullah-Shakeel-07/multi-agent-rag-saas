@@ -56,3 +56,52 @@ def get_openai_api_key() -> str:
 
 def get_pinecone_api_key() -> str:
     return settings.pinecone_api_key or ""
+
+
+# ---------------------------------------------------------------------------
+# Embedding factory
+# ---------------------------------------------------------------------------
+
+def create_embedding_function() -> CohereEmbeddings:
+    """Create Cohere embeddings function."""
+    _require(settings.cohere_api_key, "Cohere")
+    return CohereEmbeddings(
+        model=settings.embedding_model, cohere_api_key=settings.cohere_api_key
+    )
+
+
+# ---------------------------------------------------------------------------
+# LLM factory
+# ---------------------------------------------------------------------------
+
+def create_llm(llm_model: str = "Llama-instant"):
+    """Create a language model instance for the given model name."""
+    if llm_model in GROQ_MODEL_MAP:
+        key = _require(settings.groq_api_key, "Groq")
+        return ChatGroq(
+            model=GROQ_MODEL_MAP[llm_model], api_key=key, temperature=0.7
+        )
+
+    if llm_model == "GPT-4o-mini":
+        key = _require(settings.openai_api_key, "OpenAI")
+        from langchain_openai import ChatOpenAI
+        return ChatOpenAI(model="gpt-4o-mini", api_key=key, temperature=0.7)
+
+    if llm_model == "GPT-4o":
+        key = _require(settings.openai_api_key, "OpenAI")
+        from langchain_openai import ChatOpenAI
+        return ChatOpenAI(model="gpt-4o", api_key=key, temperature=0.7)
+
+    if llm_model == "GPT-4.1":
+        key = _require(settings.openai_api_key, "OpenAI")
+        from langchain_openai import ChatOpenAI
+        return ChatOpenAI(model="gpt-4.1", api_key=key, temperature=0.7)
+
+    if llm_model == "GPT-4.1-mini":
+        key = _require(settings.openai_api_key, "OpenAI")
+        from langchain_openai import ChatOpenAI
+        return ChatOpenAI(model="gpt-4.1-mini", api_key=key, temperature=0.7)
+
+    raise ValueError(
+        f"Model '{llm_model}' not available. Available: {', '.join(ALL_MODELS)}"
+    )
