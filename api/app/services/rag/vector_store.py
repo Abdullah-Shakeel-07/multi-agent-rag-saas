@@ -75,3 +75,44 @@ def get_company_vector_store(company_id: str) -> PineconeVectorStore:
 
     _company_vector_stores[company_id] = (vector_store, time.time())
     return vector_store
+
+
+def clear_company_knowledge_base(company_id: str) -> bool:
+    try:
+        index_name = get_shared_index_name()
+        index = get_pinecone_client().Index(index_name)
+        index.delete(delete_all=True, namespace=company_id)
+        _company_vector_stores.pop(company_id, None)
+        return True
+    except Exception:
+        logger.error("Failed to clear KB for company %s", company_id, exc_info=True)
+        return False
+
+
+def delete_company_knowledge_base(company_id: str) -> bool:
+    try:
+        _company_vector_stores.pop(company_id, None)
+        return delete_company_knowledge_base_vectors(company_id)
+    except Exception:
+        logger.error("Failed to delete KB for company %s", company_id, exc_info=True)
+        return False
+
+
+def delete_document_vectors(company_id: str, document_id: str) -> bool:
+    try:
+        index_name = get_shared_index_name()
+        index = get_pinecone_client().Index(index_name)
+        index.delete(filter={"document_id": {"$eq": document_id}}, namespace=company_id)
+        return True
+    except Exception:
+        logger.error("Failed to delete vectors for doc %s: %s", document_id, exc_info=True)
+        return False
+
+
+def get_vector_store_cache() -> Dict[str, Any]:
+    return _company_vector_stores
+
+
+def clear_vector_store_cache() -> None:
+    global _company_vector_stores
+    _company_vector_stores.clear()
