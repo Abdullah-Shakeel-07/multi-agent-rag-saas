@@ -60,3 +60,28 @@ def ensure_shared_index_exists() -> None:
             raise TimeoutError(f"Index creation timed out after {max_wait}s")
         time.sleep(5)
         waited += 5
+
+
+def delete_company_knowledge_base_vectors(company_id: str) -> bool:
+    """Delete all vectors in a company's namespace from the shared index."""
+    try:
+        index = get_pinecone_client().Index(SHARED_INDEX_NAME)
+        index.delete(delete_all=True, namespace=company_id)
+        return True
+    except Exception:
+        logger.error("Failed to delete vectors for company %s", company_id, exc_info=True)
+        return False
+
+
+# ---------------------------------------------------------------------------
+# Aliases used by rag_chain.py — keep the interface stable
+# ---------------------------------------------------------------------------
+
+def get_company_index_name(_company_id: str) -> str:
+    """Return the shared index name (company_id is ignored)."""
+    return SHARED_INDEX_NAME
+
+
+def ensure_company_index_exists(_company_id: str) -> None:
+    """Ensure the shared index exists (company_id is ignored)."""
+    ensure_shared_index_exists()
