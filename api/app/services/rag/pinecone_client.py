@@ -1,0 +1,62 @@
+"""
+Pinecone client initialization and management.
+
+Uses a single shared index with namespace isolation for multi-tenancy.
+Each company gets their own namespace for complete data isolation.
+"""
+
+import os
+import time
+import logging
+
+from pinecone import Pinecone, ServerlessSpec
+from .providers import get_pinecone_api_key
+
+
+def _check_pinecone_key():
+    if not get_pinecone_api_key():
+        raise ValueError("Pinecone API key is not set in environment variables.")
+
+logger = logging.getLogger(__name__)
+
+_pinecone_client = None
+# Configurable so this project can use its own index (set PINECONE_INDEX_NAME).
+SHARED_INDEX_NAME = os.getenv("PINECONE_INDEX_NAME", "rag-saas-shared")
+
+
+def get_pinecone_client() -> Pinecone:
+    """Get or create the Pinecone client singleton."""
+    global _pinecone_client
+    if _pinecone_client is None:
+        _check_pinecone_key()
+        _pinecone_client = Pinecone(api_key=get_pinecone_api_key())
+    return _pinecone_client
+
+
+def get_shared_index_name() -> str:
+    """Return the shared index name used by all companies."""
+    return SHARED_INDEX_NAME
+
+
+def ensure_shared_index_exists() -> None:
+    """
+    Create the shared Pinecone index if it doesn't exist yet.
+    Blocks until the index is ready (up to 5 minutes).
+    """
+    existing = [idx["name"] for idx in get_pinecone_client().list_indexes()]
+    if SHARED_INDEX_NAME in existing:
+        return
+
+    get_pinecone_client().create_index(
+        name=SHARED_INDEX_NAME,
+        dimension=1024,  # Cohere embed-english-v3.0
+        metric="cosine",
+        spec=ServerlessSpec(cloud="aws", region="us-east-1"),
+    )
+
+    max_wait, waited = 300, 0
+    while not get_pinecone_client().describe_index(SHARED_INDEX_NAME).status["ready"]:
+        if waited >= max_wait:
+            raise TimeoutError(f"Index creation timed out after {max_wait}s")
+        time.sleep(5)
+        waited += 5
