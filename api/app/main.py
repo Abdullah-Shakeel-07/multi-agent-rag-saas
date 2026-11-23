@@ -18,6 +18,7 @@ from app.core.rate_limit import RateLimitMiddleware
 from app.features.auth.router import router as auth_router
 from app.features.users.router import router as user_router
 from app.features.chat.router import router as chat_router
+from app.features.public.router import router as public_router
 from app.features.billing.router import router as billing_router
 
 # ---------------------------------------------------------------------------
@@ -85,6 +86,7 @@ async def value_error_handler(_request: Request, exc: ValueError):
 app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(chat_router)
+app.include_router(public_router)
 app.include_router(billing_router)
 
 # ---------------------------------------------------------------------------
