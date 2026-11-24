@@ -451,6 +451,49 @@ export default function AIStudioPage() {
                 })}
               </div>
             </div>
+
+            {/* Tone selection */}
+            <div className="bg-white dark:bg-white/[0.02] rounded-xl border border-neutral-200 dark:border-white/[0.06] overflow-hidden">
+              <div className="px-5 py-4 border-b border-slate-100 dark:border-white/[0.06] flex items-center justify-between">
+                <div>
+                  <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Tone</h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    Set the personality and voice of your chatbot
+                  </p>
+                </div>
+                {isFree && <ProBadge />}
+              </div>
+              <div className="p-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+                {TONE_OPTIONS.map((tone) => {
+                  const isSelected = formData.tone === tone.id;
+                  const IconComponent = Icons[tone.icon];
+                  return (
+                    <button
+                      key={tone.id}
+                      aria-disabled={isFree}
+                      onClick={() => !isFree && updateField("tone", tone.id)}
+                      className={`group flex flex-col items-center gap-2 py-4 px-3 rounded-xl border transition-all duration-150 ${
+                        isSelected
+                          ? "bg-teal-50/60 dark:bg-teal-500/[0.06] border-teal-300 dark:border-teal-500/40 ring-2 ring-teal-500/15 dark:ring-teal-500/20"
+                          : "border-slate-200 hover:border-slate-300 dark:border-white/[0.06] dark:hover:border-white/[0.10] hover:bg-slate-50 dark:hover:bg-white/[0.04]"
+                      } ${isFree && !isSelected ? "opacity-50 cursor-not-allowed" : ""}`}
+                    >
+                      <div className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors ${
+                        isSelected ? "bg-teal-100 dark:bg-teal-500/15 ring-1 ring-inset ring-teal-200 dark:ring-teal-500/25" : "bg-slate-100 dark:bg-white/[0.04]"
+                      }`}>
+                        <IconComponent className={`h-[18px] w-[18px] transition-colors ${isSelected ? "text-teal-600 dark:text-teal-300" : "text-slate-500 dark:text-slate-400"}`} />
+                      </div>
+                      <div className="text-center">
+                        <span className={`text-[13px] font-semibold block transition-colors ${isSelected ? "text-teal-700 dark:text-teal-200" : "text-slate-800 dark:text-slate-100"}`}>
+                          {tone.label}
+                        </span>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-tight">{tone.desc}</p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         )}
       </div>
