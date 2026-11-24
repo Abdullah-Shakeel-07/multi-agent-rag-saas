@@ -6,11 +6,12 @@ Creates the FastAPI app, registers middleware, exception handlers, and routers.
 
 import logging
 import os
+import re
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 
 from app.core.exceptions import AppException, RateLimitError
 from app.core.middleware import RequestLoggingMiddleware
@@ -34,8 +35,17 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_DIR = os.path.join(BASE_DIR, "static")
+
+TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
+
+_jinja_env = Environment(
+    loader=FileSystemLoader(TEMPLATES_DIR),
+    autoescape=select_autoescape(["html"]),
+)
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -97,6 +107,9 @@ app.include_router(billing_router)
 # Static / widget endpoints
 # ---------------------------------------------------------------------------
 
+_SLUG_RE = re.compile(r"^[a-zA-Z0-9_-]{3,50}$")
+
+
 @app.get("/embed.js")
 async def serve_embed_script():
     embed_path = os.path.join(STATIC_DIR, "embed.js")
@@ -105,6 +118,21 @@ async def serve_embed_script():
         media_type="application/javascript",
         headers={"Cache-Control": "no-cache", "Access-Control-Allow-Origin": "*"},
     )
+
+
+@app.get("/preview/{company_slug}")
+async def serve_widget_preview(company_slug: str, request: Request):
+    # Validate slug to prevent XSS
+    if not _SLUG_RE.match(company_slug):
+        return JSONResponse(status_code=400, content={"detail": "Invalid company slug"})
+
+    base_url = str(request.base_url).rstrip("/")
+    if "localhost" not in base_url and "127.0.0.1" not in base_url:
+        base_url = base_url.replace("http://", "https://", 1)
+
+    template = _jinja_env.get_template("widget_preview.html")
+    html = template.render(company_slug=company_slug, base_url=base_url)
+    return HTMLResponse(content=html)
 
 
 # Mount static files
