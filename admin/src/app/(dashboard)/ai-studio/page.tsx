@@ -496,6 +496,55 @@ export default function AIStudioPage() {
             </div>
           </div>
         )}
+
+        {/* === INSTRUCTIONS (System Prompt) === */}
+        {activeSection === "prompt" && (
+          <div className="space-y-4">
+            {isFree && <UpgradeNudge feature="Custom instructions" />}
+
+            <div className="bg-white dark:bg-white/[0.02] rounded-xl border border-neutral-200 dark:border-white/[0.06] overflow-hidden">
+              <div className="px-6 py-4 border-b border-slate-100 dark:border-white/[0.06] flex items-center justify-between">
+                <div>
+                  <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Additional Instructions</h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    These instructions are appended to the default system prompt — your base prompt is always preserved
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {isFree && <ProBadge />}
+                  {!isFree && formData.systemPrompt && (
+                    <button
+                      onClick={() => updateField("systemPrompt", "")}
+                      className="flex items-center gap-1.5 text-xs font-medium text-slate-400 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-400 px-2.5 py-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-white/[0.04] transition-all"
+                    >
+                      <Icons.RotateCcw className="h-3 w-3" />
+                      Clear
+                    </button>
+                  )}
+                </div>
+              </div>
+              <div className="p-5">
+                <textarea
+                  value={formData.systemPrompt}
+                  onChange={(e) => updateField("systemPrompt", e.target.value)}
+                  readOnly={isFree}
+                  placeholder={isFree
+                    ? "Upgrade to Pro to add custom instructions..."
+                    : `Add custom instructions for your chatbot...\n\nExamples:\n- "Always recommend our premium plan when relevant"\n- "Never discuss competitor products"\n- "Include a link to our docs when answering technical questions"`}
+                  rows={10}
+                  className={`w-full rounded-lg border border-neutral-200 dark:border-white/[0.06] bg-neutral-50/50 dark:bg-white/[0.02] text-slate-800 dark:text-slate-100 placeholder-slate-300 dark:placeholder-slate-600 px-4 py-3.5 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 focus:bg-white dark:focus:bg-white/[0.04] resize-y transition-all ${isFree ? "bg-neutral-100 dark:bg-white/[0.04] text-slate-400 dark:text-slate-400 cursor-not-allowed resize-none" : ""}`}
+                />
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 bg-neutral-50 dark:bg-transparent border border-neutral-200 dark:border-white/[0.06] rounded-xl px-4 py-3">
+              <Icons.AlertCircle className="h-4 w-4 text-slate-400 dark:text-slate-400 flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                Your chatbot already has a comprehensive default prompt that handles greetings, knowledge-base-only answers, follow-ups, and more. Anything you write here gets added on top — use it for company-specific rules and preferences.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Upload Drawer */}
