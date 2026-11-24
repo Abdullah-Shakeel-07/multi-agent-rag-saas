@@ -9,7 +9,8 @@ import os
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, JSONResponse
 
 from app.core.exceptions import AppException, RateLimitError
 from app.core.middleware import RequestLoggingMiddleware
@@ -32,6 +33,9 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
 )
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+STATIC_DIR = os.path.join(BASE_DIR, "static")
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -88,6 +92,25 @@ app.include_router(user_router)
 app.include_router(chat_router)
 app.include_router(public_router)
 app.include_router(billing_router)
+
+# ---------------------------------------------------------------------------
+# Static / widget endpoints
+# ---------------------------------------------------------------------------
+
+@app.get("/embed.js")
+async def serve_embed_script():
+    embed_path = os.path.join(STATIC_DIR, "embed.js")
+    return FileResponse(
+        embed_path,
+        media_type="application/javascript",
+        headers={"Cache-Control": "no-cache", "Access-Control-Allow-Origin": "*"},
+    )
+
+
+# Mount static files
+if os.path.exists(STATIC_DIR):
+    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
 
 # ---------------------------------------------------------------------------
 # Health
