@@ -390,6 +390,69 @@ export default function AIStudioPage() {
           </div>
         )}
 
+        {/* === MODEL & TONE === */}
+        {activeSection === "model" && (
+          <div className="space-y-6">
+            {isFree && <UpgradeNudge feature="Model & Tone" />}
+
+            {/* Model selection */}
+            <div className="bg-white dark:bg-white/[0.02] rounded-xl border border-neutral-200 dark:border-white/[0.06] overflow-hidden">
+              <div className="px-5 py-4 border-b border-slate-100 dark:border-white/[0.06] flex items-center justify-between">
+                <div>
+                  <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Language Model</h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    Choose the AI model that powers your chatbot
+                  </p>
+                </div>
+                {isFree && <ProBadge />}
+              </div>
+              <div className="p-2 space-y-1">
+                {MODEL_OPTIONS.map((model) => {
+                  const isSelected = formData.defaultModel === model.id;
+                  return (
+                    <button
+                      key={model.id}
+                      aria-disabled={isFree}
+                      onClick={() => !isFree && updateField("defaultModel", model.id)}
+                      className={`group w-full flex items-center gap-3.5 px-4 py-3 rounded-lg text-left transition-all duration-150 ${
+                        isSelected
+                          ? "bg-teal-50/60 dark:bg-teal-500/[0.06] ring-1 ring-teal-500/30 dark:ring-teal-500/25"
+                          : "hover:bg-slate-50 dark:hover:bg-white/[0.04]"
+                      } ${isFree && !isSelected ? "opacity-50 cursor-not-allowed" : ""}`}
+                    >
+                      <div className={`w-[18px] h-[18px] rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                        isSelected ? "border-teal-500 bg-teal-500 dark:border-teal-400 dark:bg-teal-400" : "border-slate-300 dark:border-white/[0.15]"
+                      }`}>
+                        {isSelected && <div className="w-[7px] h-[7px] rounded-full bg-white" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className={`text-[13px] font-semibold ${isSelected ? "text-teal-700 dark:text-teal-200" : "text-slate-900 dark:text-white"}`}>
+                            {model.name}
+                          </span>
+                          <span className="text-[10px] text-slate-400 dark:text-slate-400 font-medium uppercase tracking-wider">
+                            {model.provider}
+                          </span>
+                          {model.tag && (
+                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-teal-50 dark:bg-teal-500/15 text-teal-700 dark:text-teal-300 border border-teal-200/60 dark:border-teal-500/20">
+                              {model.tag}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-400 dark:text-slate-400 mt-0.5">{model.desc}</p>
+                      </div>
+                      <span className={`text-[11px] font-mono tabular-nums hidden sm:block transition-colors ${
+                        isSelected ? "text-teal-600 dark:text-teal-400" : "text-slate-300 dark:text-slate-600"
+                      }`}>
+                        {model.speed}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Upload Drawer */}
