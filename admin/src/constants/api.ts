@@ -11,3 +11,9 @@ export const API_CONFIG = {
   RETRY_ATTEMPTS: 3,
   RETRY_DELAY: 1000,
 } as const;
+
+// Utility function to construct API URLs
+// Always use this instead of hardcoding URLs
+export const getApiUrl = (endpoint: string): string => {
+  return `${API_CONFIG.BASE_URL}${endpoint}`;
+};
