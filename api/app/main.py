@@ -20,6 +20,7 @@ from app.core.rate_limit import RateLimitMiddleware
 from app.features.auth.router import router as auth_router
 from app.features.users.router import router as user_router
 from app.features.chat.router import router as chat_router
+from app.features.documents.router import router as documents_router
 from app.features.public.router import router as public_router
 from app.features.analytics.router import router as analytics_router
 from app.features.billing.router import router as billing_router
@@ -40,7 +41,6 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_DIR = os.path.join(BASE_DIR, "static")
-
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 
 _jinja_env = Environment(
@@ -101,6 +101,7 @@ async def value_error_handler(_request: Request, exc: ValueError):
 app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(chat_router)
+app.include_router(documents_router)
 app.include_router(public_router)
 app.include_router(analytics_router)
 app.include_router(billing_router)
